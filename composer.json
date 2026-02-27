@@ -1,0 +1,26 @@
+{
+    "name": "autodiscount/autodiscount",
+    "type": "thelia-module",
+    "description": "Automatically applies cart discounts by configured amount thresholds",
+    "keywords": [
+        "thelia",
+        "module",
+        "discount",
+        "cart",
+        "promotion",
+        "threshold"
+    ],
+    "authors": [
+        {
+            "name": "Delimard Thibault",
+            "email": "support@delimard.fr",
+            "homepage": "http://www.delimard.fr"
+        }
+    ],
+    "require": {
+        "thelia/installer": "~1.1"
+    },
+    "extra": {
+        "installer-name": "AutoDiscount"
+    }
+}

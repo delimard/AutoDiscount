@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://thelia.net/schema/dic/module"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_2.xsd">
+
+    <fullnamespace>AutoDiscount\AutoDiscount</fullnamespace>
+
+    <descriptive locale="en_US">
+        <title>Auto Discount - Automatic cart discounts by amount threshold</title>
+        <description>Automatically applies a percentage discount when the cart total reaches a configured threshold. Multiple thresholds can be configured.</description>
+    </descriptive>
+
+    <descriptive locale="fr_FR">
+        <title>Remise Automatique - Remises automatiques par palier de montant panier</title>
+        <description>Applique automatiquement une remise en pourcentage lorsque le montant du panier atteint un palier configuré. Plusieurs paliers peuvent être définis.</description>
+    </descriptive>
+
+    <languages>
+        <language>en_US</language>
+        <language>fr_FR</language>
+    </languages>
+
+    <version>1.0.0</version>
+
+    <authors>
+        <author>
+            <name>Delimard Thibault</name>
+            <email>support@delimard.fr</email>
+        </author>
+    </authors>
+
+    <type>classic</type>
+    <thelia>2.5.0</thelia>
+    <stability>beta</stability>
+</module>

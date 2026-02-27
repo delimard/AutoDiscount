@@ -1,0 +1,20 @@
+{* Template affiché dans le hook "order-invoice.before-discount" *}
+{* Affiche la remise automatique appliquée au panier *}
+
+{if $auto_discount_amount > 0}
+    {loop type="currency" name="autodiscount.currency" default_only=1}
+        {$auto_discount_currency = $SYMBOL}
+    {/loop}
+
+    <tr class="autodiscount-row">
+        <td colspan="2" class="text-success">
+            <i class="glyphicon glyphicon-tag"></i>
+            <strong>
+                {intl l='Remise automatique appliquée' d='autodiscount.fo.default'}
+            </strong>
+        </td>
+        <td colspan="2" class="text-success text-right">
+            &minus;&nbsp;{format_money number=$auto_discount_amount symbol=$auto_discount_currency}
+        </td>
+    </tr>
+{/if}

@@ -1,0 +1,384 @@
+{default_translation_domain domain='autodiscount.bo.default'}
+{extends file="admin-layout.tpl"}
+
+{block name="no-return-functions"}
+    {$admin_current_location = 'autodiscount'}
+{/block}
+
+{block name="page-title"}{intl l='AutoDiscount – Configuration'}{/block}
+{block name="check-resource"}admin.module{/block}
+{block name="check-access"}view{/block}
+{block name="check-module"}AutoDiscount{/block}
+
+{block name="after-admin-css"}
+<style>
+:root {
+    --ad-primary: #e87722;
+    --ad-success: #5cb85c;
+    --ad-danger:  #d9534f;
+    --ad-light:   #fafafa;
+    --ad-border:  #ddd;
+    --ad-radius:  6px;
+    --ad-shadow:  0 2px 10px rgba(232,119,34,.10);
+    --ad-trans:   .18s ease;
+}
+.ad-header {
+    background: linear-gradient(135deg, #e87722 0%, #c45e10 100%);
+    border-radius: var(--ad-radius);
+    color: #fff;
+    padding: 24px 28px 20px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.ad-header::after {
+    content: "\e250";
+    font-family: 'Glyphicons Halflings';
+    font-size: 110px;
+    opacity: .07;
+    position: absolute;
+    right: 24px;
+    top: -14px;
+    line-height: 1;
+}
+.ad-header h2 { margin: 0 0 6px; font-size: 20px; font-weight: 600; color: #fff; }
+.ad-header p  { margin: 0; font-size: 13px; opacity: .88; line-height: 1.55; max-width: 580px; }
+#ad-toast {
+    position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+    padding: 14px 22px 14px 18px; border-radius: 6px;
+    font-size: 13.5px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.18);
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none; max-width: 360px;
+}
+#ad-toast.ad-toast-show    { transform: translateY(0); opacity: 1; }
+#ad-toast.ad-toast-success { background: #dff0d8; color: #3c763d; border-left: 4px solid var(--ad-success); }
+#ad-toast.ad-toast-error   { background: #f2dede; color: #a94442; border-left: 4px solid var(--ad-danger); }
+#ad-empty {
+    text-align: center; padding: 40px 24px;
+    background: var(--ad-light); border: 2px dashed var(--ad-border);
+    border-radius: var(--ad-radius); color: #aaa; margin-bottom: 18px; display: none;
+}
+#ad-empty .ad-empty-icon { font-size: 44px; display: block; margin-bottom: 10px; opacity: .4; }
+#ad-empty p { margin: 0; font-size: 13px; }
+#ad-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.ad-card {
+    background: #fff; border: 1px solid var(--ad-border);
+    border-left: 5px solid var(--ad-primary);
+    border-radius: var(--ad-radius); box-shadow: var(--ad-shadow);
+    padding: 16px 20px; display: flex; align-items: center; gap: 16px;
+    transition: box-shadow var(--ad-trans);
+    animation: adSlideIn .20s ease forwards;
+}
+.ad-card:hover        { box-shadow: 0 4px 16px rgba(232,119,34,.18); }
+.ad-card:focus-within { border-left-color: #c45e10; }
+@keyframes adSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ad-card-num {
+    min-width: 30px; height: 30px; background: var(--ad-primary); color: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 17px;
+}
+.ad-card-fields { flex: 1; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ad-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 110px; }
+.ad-field label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; color: #999; margin: 0;
+}
+.ad-field-input-wrap {
+    display: flex; align-items: center; background: var(--ad-light);
+    border: 1px solid var(--ad-border); border-radius: 4px;
+    overflow: hidden; transition: border-color var(--ad-trans);
+}
+.ad-field-input-wrap:focus-within { border-color: var(--ad-primary); background: #fff; }
+.ad-field-input-wrap input {
+    border: none !important; background: transparent !important;
+    box-shadow: none !important; padding: 7px 9px;
+    font-size: 14px; font-weight: 600; color: #333;
+    flex: 1; min-width: 0; outline: none;
+}
+.ad-field-addon {
+    padding: 7px 10px; font-size: 13px; font-weight: 700; color: #888;
+    background: transparent; border-left: 1px solid var(--ad-border);
+    white-space: nowrap; flex-shrink: 0;
+}
+.ad-arrow { font-size: 20px; color: #ccc; flex-shrink: 0; line-height: 1; margin-top: 17px; }
+.ad-card-del {
+    background: none; border: 1px solid #f5c6c5; color: var(--ad-danger);
+    border-radius: 4px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all var(--ad-trans); margin-top: 17px;
+}
+.ad-card-del:hover { background: var(--ad-danger); color: #fff; border-color: var(--ad-danger); }
+.ad-actions-row { margin-bottom: 18px; }
+.ad-btn-save {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; height: 36px; padding: 0 16px;
+    background: var(--ad-success); color: #fff;
+    border: none; border-radius: 4px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all var(--ad-trans); box-sizing: border-box;
+}
+.ad-btn-save:hover { background: #449d44; color: #fff; }
+.ad-btn-add {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; height: 36px; padding: 0 16px;
+    background: #fff; border: 2px dashed var(--ad-primary); border-radius: 4px;
+    color: var(--ad-primary); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all var(--ad-trans); box-sizing: border-box;
+}
+.ad-btn-add:hover { background: #fef3ec; border-style: solid; }
+.ad-info {
+    background: #fef6ef; border: 1px solid #f5c99a; border-radius: 4px;
+    padding: 12px 16px; font-size: 13px; color: #8a4a14; margin-top: 18px;
+    display: flex; gap: 8px; align-items: flex-start; line-height: 1.5;
+}
+.ad-info .glyphicon { flex-shrink: 0; margin-top: 1px; }
+</style>
+{/block}
+
+{block name="main-content"}
+<div id="wrapper" class="container">
+
+    <div class="clearfix">
+        <ul class="breadcrumb pull-left">
+            <li><a href="{url path='/admin/home'}">{intl l="Accueil"}</a></li>
+            <li><a href="{url path='/admin/modules'}">{intl l="Modules"}</a></li>
+            <li class="active">{intl l="AutoDiscount"}</li>
+        </ul>
+    </div>
+
+    <div class="general-block-decorator">
+
+        <div class="row">
+            <div class="col-md-12 title title-without-tabs">
+                {intl l='AutoDiscount – Remise automatique par palier'}
+            </div>
+        </div>
+
+        <div class="form-container">
+
+            <div class="ad-header">
+                <h2>
+                    <span class="glyphicon glyphicon-tag" style="margin-right:8px;font-size:17px;"></span>
+                    {intl l='Configuration des paliers de remise'}
+                </h2>
+                <p>{intl l='Définissez vos seuils de remise. Le palier le plus élevé atteint est automatiquement appliqué sur le total TTC du panier.'}</p>
+            </div>
+
+            <div class="row ad-actions-row">
+                <div class="col-xs-6">
+                    <button type="button" id="js-ad-save" class="ad-btn-save">
+                        <span class="glyphicon glyphicon-floppy-disk"></span>
+                        {intl l='Enregistrer les paliers'}
+                    </button>
+                </div>
+                <div class="col-xs-6">
+                    <button type="button" id="js-ad-add" class="ad-btn-add">
+                        <span class="glyphicon glyphicon-plus"></span>
+                        {intl l='Ajouter un palier'}
+                    </button>
+                </div>
+            </div>
+
+            <div id="ad-empty" {if $rules|@count > 0}style="display:none"{/if}>
+                <span class="ad-empty-icon glyphicon glyphicon-tag"></span>
+                <p>{intl l='Aucun palier configuré. Ajoutez votre premier palier ci-dessus.'}</p>
+            </div>
+
+            <div id="ad-cards">
+                {foreach from=$rules item=rule name=ruleLoop}
+                <div class="ad-card js-ad-card">
+                    <div class="ad-card-num js-ad-num">{$smarty.foreach.ruleLoop.iteration}</div>
+                    <div class="ad-card-fields">
+                        <div class="ad-field">
+                            <label>{intl l='Montant seuil TTC'}</label>
+                            <div class="ad-field-input-wrap">
+                                <input type="number" name="min_amount[]" step="0.01" min="0"
+                                       value="{$rule.min_amount}" placeholder="300.00">
+                                <span class="ad-field-addon">€</span>
+                            </div>
+                        </div>
+                        <div class="ad-arrow">→</div>
+                        <div class="ad-field">
+                            <label>{intl l='Remise appliquée'}</label>
+                            <div class="ad-field-input-wrap">
+                                <input type="number" name="discount_percent[]" step="0.01" min="0.01" max="100"
+                                       value="{$rule.discount_percent}" placeholder="10">
+                                <span class="ad-field-addon">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="ad-card-del js-ad-del" title="{intl l='Supprimer ce palier'}">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </div>
+                {/foreach}
+            </div>
+
+            <div class="ad-info">
+                <span class="glyphicon glyphicon-info-sign"></span>
+                <span>
+                    <strong>{intl l='Exemple'} : </strong>
+                    {intl l='Palier 100 € → 5 %, palier 300 € → 10 %. Un panier à 350 € TTC bénéficie automatiquement de 10 %. La remise est cumulable avec les coupons.'}
+                </span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="ad-toast" role="alert"></div>
+{/block}
+
+{block name="javascript-initialization"}
+{assign var="lbl_delete" value={intl l='Supprimer ce palier'}}
+{assign var="lbl_threshold" value={intl l='Montant seuil TTC'}}
+{assign var="lbl_discount" value={intl l='Remise appliquée'}}
+<script>
+(function () {
+    'use strict';
+
+    var saveUrl      = '{url path="/admin/module/AutoDiscount/save"}';
+    var labelDelete   = '{$lbl_delete|escape:javascript}';
+    var labelThresh   = '{$lbl_threshold|escape:javascript}';
+    var labelDiscount = '{$lbl_discount|escape:javascript}';
+    var cards    = document.getElementById('ad-cards');
+    var empty    = document.getElementById('ad-empty');
+    var toast    = document.getElementById('ad-toast');
+    var toastTid = null;
+
+    function renumber() {
+        var nums = cards.querySelectorAll('.js-ad-num');
+        nums.forEach(function (el, i) { el.textContent = i + 1; });
+        empty.style.display = nums.length === 0 ? '' : 'none';
+    }
+
+    function showToast(msg, type) {
+        clearTimeout(toastTid);
+        toast.className = 'ad-toast-show ad-toast-' + type;
+        toast.innerHTML = '<span class="glyphicon glyphicon-' +
+            (type === 'success' ? 'ok-circle' : 'exclamation-sign') +
+            '"></span> ' + msg;
+        toastTid = setTimeout(function () {
+            toast.classList.remove('ad-toast-show');
+        }, 3800);
+    }
+
+    function makeCard(minVal, discVal) {
+        var card = document.createElement('div');
+        card.className = 'ad-card js-ad-card';
+        card.innerHTML =
+            '<div class="ad-card-num js-ad-num">?</div>' +
+            '<div class="ad-card-fields">' +
+                '<div class="ad-field">' +
+                    '<label>' + labelThresh + '</label>' +
+                    '<div class="ad-field-input-wrap">' +
+                        '<input type="number" name="min_amount[]" step="0.01" min="0"' +
+                        ' value="' + (minVal || '') + '" placeholder="300.00">' +
+                        '<span class="ad-field-addon">€</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-arrow">→</div>' +
+                '<div class="ad-field">' +
+                    '<label>' + labelDiscount + '</label>' +
+                    '<div class="ad-field-input-wrap">' +
+                        '<input type="number" name="discount_percent[]" step="0.01" min="0.01" max="100"' +
+                        ' value="' + (discVal || '') + '" placeholder="10">' +
+                        '<span class="ad-field-addon">%</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<button type="button" class="ad-card-del js-ad-del" title="' + labelDelete + '">' +
+                '<span class="glyphicon glyphicon-trash"></span>' +
+            '</button>';
+        return card;
+    }
+
+    document.getElementById('js-ad-add').addEventListener('click', function () {
+        var card = makeCard('', '');
+        cards.appendChild(card);
+        renumber();
+        card.querySelector('input').focus();
+    });
+
+    cards.addEventListener('click', function (e) {
+        var btn = e.target.closest('.js-ad-del');
+        if (!btn) { return; }
+        var card = btn.closest('.js-ad-card');
+        card.style.transition = 'opacity .18s, transform .18s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(12px)';
+        setTimeout(function () { card.remove(); renumber(); }, 180);
+    });
+
+    document.getElementById('js-ad-save').addEventListener('click', function () {
+        var btn      = this;
+        var allCards = cards.querySelectorAll('.js-ad-card');
+        var fd       = new FormData();
+        var valid    = true;
+
+        allCards.forEach(function (card) {
+            var minInput  = card.querySelector('input[name="min_amount[]"]');
+            var discInput = card.querySelector('input[name="discount_percent[]"]');
+            var minWrap   = minInput.closest('.ad-field-input-wrap');
+            var discWrap  = discInput.closest('.ad-field-input-wrap');
+
+            minWrap.style.borderColor  = '';
+            discWrap.style.borderColor = '';
+
+            if (minInput.value === '' || isNaN(parseFloat(minInput.value)) || parseFloat(minInput.value) < 0) {
+                minWrap.style.borderColor = '#d9534f';
+                valid = false;
+            }
+            if (discInput.value === '' || isNaN(parseFloat(discInput.value)) ||
+                parseFloat(discInput.value) <= 0 || parseFloat(discInput.value) > 100) {
+                discWrap.style.borderColor = '#d9534f';
+                valid = false;
+            }
+
+            fd.append('min_amount[]',       minInput.value);
+            fd.append('discount_percent[]', discInput.value);
+        });
+
+        if (!valid) {
+            showToast('{intl l="Veuillez corriger les champs en rouge."}', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="glyphicon glyphicon-refresh ad-spin"></span> {intl l="Enregistrement…"}';
+
+        fetch(saveUrl, {
+            method : 'POST',
+            body   : fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+            if (res.ok && res.d.success) {
+                showToast('{intl l="Paliers enregistrés avec succès !"}', 'success');
+            } else {
+                showToast(res.d.error || '{intl l="Une erreur est survenue."}', 'error');
+            }
+        })
+        .catch(function () { showToast('{intl l="Erreur réseau – veuillez réessayer."}', 'error'); })
+        .finally(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="glyphicon glyphicon-floppy-disk"></span> {intl l="Enregistrer les paliers"}';
+        });
+    });
+
+    var style = document.createElement('style');
+    {literal}
+    style.textContent = '@keyframes adSpin{to{transform:rotate(360deg)}} .ad-spin{display:inline-block;animation:adSpin .7s linear infinite;}';
+    {/literal}
+    document.head.appendChild(style);
+
+    renumber();
+}());
+</script>
+{/block}
