@@ -20,7 +20,7 @@
         <language>fr_FR</language>
     </languages>
 
-    <version>1.0.0</version>
+    <version>3.0.1</version>
 
     <authors>
         <author>
@@ -30,6 +30,6 @@
     </authors>
 
     <type>classic</type>
-    <thelia>2.5.0</thelia>
+    <thelia>3.0.0</thelia>
     <stability>beta</stability>
 </module>

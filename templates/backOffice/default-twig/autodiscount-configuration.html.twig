@@ -1,0 +1,148 @@
+{% extends '@BackOfficeDefaultTwig/base.html.twig' %}
+
+{% block body_testid %}autodiscount-configuration{% endblock %}
+
+{% block title %}{{ 'AutoDiscount – Configuration'|trans({}, 'autodiscount') }}{% endblock %}
+
+{% block content %}
+{% if not is_granted('VIEW', {resource: 'admin.module', module: 'AutoDiscount'}) %}
+    <div class="alert alert-danger">{{ 'Access denied'|trans }}</div>
+{% else %}
+<div class="container-fluid">
+    <h1 class="h3 mb-3">{{ 'AutoDiscount – Remise automatique par palier'|trans({}, 'autodiscount') }}</h1>
+    <p>{{ 'Définissez vos seuils de remise. Le palier le plus élevé atteint est automatiquement appliqué sur le total TTC du panier.'|trans({}, 'autodiscount') }}</p>
+
+    <div id="ad-alert" class="alert" style="display:none;" role="alert"></div>
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" id="ad-save"><i class="bi bi-check-lg"></i> {{ 'Enregistrer les paliers'|trans({}, 'autodiscount') }}</button>
+        <button type="button" class="btn btn-outline-secondary" id="ad-add"><i class="bi bi-plus-lg"></i> {{ 'Ajouter un palier'|trans({}, 'autodiscount') }}</button>
+    </div>
+
+    <div id="ad-rules" class="vstack gap-2 mb-3">
+        {% for rule in rules %}
+            <div class="card ad-rule">
+                <div class="card-body row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label">{{ 'Montant seuil TTC'|trans({}, 'autodiscount') }}</label>
+                        <div class="input-group"><input type="number" min="0" step="0.01" class="form-control" data-field="min_amount" value="{{ rule.min_amount }}" placeholder="300.00"><span class="input-group-text">€</span></div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">{{ 'Remise appliquée'|trans({}, 'autodiscount') }}</label>
+                        <div class="input-group"><input type="number" min="0.01" max="100" step="0.01" class="form-control" data-field="discount_percent" value="{{ rule.discount_percent }}" placeholder="10"><span class="input-group-text">%</span></div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button type="button" class="btn btn-outline-danger ad-del" title="{{ 'Supprimer ce palier'|trans({}, 'autodiscount') }}"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="ad-empty" class="text-muted" {% if rules|length > 0 %}style="display:none;"{% endif %}>
+        {{ 'Aucun palier configuré. Ajoutez votre premier palier ci-dessus.'|trans({}, 'autodiscount') }}
+    </div>
+
+    <div class="alert alert-info">
+        <strong>{{ 'Exemple'|trans({}, 'autodiscount') }} : </strong>
+        {{ 'Palier 100 € → 5 %, palier 300 € → 10 %. Un panier à 350 € TTC bénéficie automatiquement de 10 %. La remise est cumulable avec les coupons.'|trans({}, 'autodiscount') }}
+    </div>
+</div>
+
+<template id="ad-rule-template">
+    <div class="card ad-rule">
+        <div class="card-body row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">{{ 'Montant seuil TTC'|trans({}, 'autodiscount') }}</label>
+                <div class="input-group"><input type="number" min="0" step="0.01" class="form-control" data-field="min_amount" placeholder="300.00"><span class="input-group-text">€</span></div>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">{{ 'Remise appliquée'|trans({}, 'autodiscount') }}</label>
+                <div class="input-group"><input type="number" min="0.01" max="100" step="0.01" class="form-control" data-field="discount_percent" placeholder="10"><span class="input-group-text">%</span></div>
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-outline-danger ad-del" title="{{ 'Supprimer ce palier'|trans({}, 'autodiscount') }}"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+(function () {
+    'use strict';
+
+    const saveUrl = {{ path('autodiscount_save')|json_encode|raw }};
+    const messages = {
+        saved: {{ 'Paliers enregistrés avec succès.'|trans({}, 'autodiscount')|json_encode|raw }},
+        error: {{ 'Une erreur est survenue.'|trans({}, 'autodiscount')|json_encode|raw }},
+        network: {{ 'Erreur réseau – veuillez réessayer.'|trans({}, 'autodiscount')|json_encode|raw }},
+        invalid: {{ 'Veuillez corriger les champs en rouge.'|trans({}, 'autodiscount')|json_encode|raw }},
+    };
+
+    const container = document.getElementById('ad-rules');
+    const empty = document.getElementById('ad-empty');
+    const alertBox = document.getElementById('ad-alert');
+
+    function refreshEmpty() {
+        empty.style.display = container.querySelector('.ad-rule') ? 'none' : '';
+    }
+
+    function notify(type, text) {
+        alertBox.className = 'alert alert-' + type;
+        alertBox.textContent = text;
+        alertBox.style.display = '';
+    }
+
+    document.getElementById('ad-add').addEventListener('click', function () {
+        container.append(document.getElementById('ad-rule-template').content.cloneNode(true));
+        refreshEmpty();
+    });
+
+    container.addEventListener('click', function (event) {
+        const button = event.target.closest('.ad-del');
+        if (button) {
+            button.closest('.ad-rule').remove();
+            refreshEmpty();
+        }
+    });
+
+    document.getElementById('ad-save').addEventListener('click', async function () {
+        const body = new URLSearchParams();
+        let valid = true;
+
+        container.querySelectorAll('.ad-rule').forEach(function (row) {
+            const min = row.querySelector('[data-field="min_amount"]');
+            const percent = row.querySelector('[data-field="discount_percent"]');
+            const minOk = min.value !== '' && parseFloat(min.value) >= 0;
+            const percentOk = percent.value !== '' && parseFloat(percent.value) > 0 && parseFloat(percent.value) <= 100;
+
+            min.classList.toggle('is-invalid', !minOk);
+            percent.classList.toggle('is-invalid', !percentOk);
+            valid = valid && minOk && percentOk;
+
+            body.append('min_amount[]', min.value);
+            body.append('discount_percent[]', percent.value);
+        });
+
+        if (!valid) {
+            notify('warning', messages.invalid);
+            return;
+        }
+
+        try {
+            const response = await fetch(saveUrl, {method: 'POST', body: body, credentials: 'same-origin', headers: {Accept: 'application/json'}});
+            const json = await response.json().catch(() => ({}));
+
+            if (response.ok && json.success) {
+                notify('success', messages.saved);
+            } else {
+                notify('danger', json.error || messages.error);
+            }
+        } catch (e) {
+            notify('danger', messages.network);
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

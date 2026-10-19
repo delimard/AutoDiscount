@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoDiscount\Controller;
 
 use AutoDiscount\AutoDiscount;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Admin\BaseAdminController;
-use Thelia\Core\HttpFoundation\JsonResponse;
-use Thelia\Core\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
@@ -18,8 +21,8 @@ class AutoDiscountConfigController extends BaseAdminController
 {
     /**
      * Affiche la page de configuration.
-     * Route : GET /admin/module/AutoDiscount  (déclarée dans Config/routing.xml)
      */
+    #[Route('/admin/module/AutoDiscount', name: 'autodiscount_configure', methods: ['GET'])]
     public function configureAction(): Response
     {
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'AutoDiscount', AccessManager::VIEW)) {
@@ -38,15 +41,13 @@ class AutoDiscountConfigController extends BaseAdminController
      *   min_amount[]       – montants seuils (ex : 100, 200, 300)
      *   discount_percent[] – pourcentages correspondants (ex : 5, 8, 10)
      *
-     * Route : POST /admin/module/AutoDiscount/save  (déclarée dans Config/routing.xml)
      */
-    public function saveAction(RequestStack $requestStack): JsonResponse
+    #[Route('/admin/module/AutoDiscount/save', name: 'autodiscount_save', methods: ['POST'])]
+    public function saveAction(Request $request): JsonResponse
     {
-        if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'AutoDiscount', AccessManager::UPDATE)) {
+        if (null !== $this->checkAuth(AdminResources::MODULE, 'AutoDiscount', AccessManager::UPDATE)) {
             return new JsonResponse(['error' => 'Unauthorized'], 403);
         }
-
-        $request = $requestStack->getCurrentRequest();
 
         try {
             $minAmounts       = $request->request->all('min_amount');
@@ -94,7 +95,7 @@ class AutoDiscountConfigController extends BaseAdminController
             // Tri croissant par seuil pour le stockage
             usort($rules, static fn ($a, $b) => $a['min_amount'] <=> $b['min_amount']);
 
-            AutoDiscount::setConfigValue(AutoDiscount::CONFIG_RULES, json_encode($rules));
+            AutoDiscount::setConfigValue(AutoDiscount::CONFIG_RULES, json_encode($rules, JSON_THROW_ON_ERROR));
 
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], 500);

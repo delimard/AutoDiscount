@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoDiscount\EventListener;
 
 use AutoDiscount\AutoDiscount;
@@ -11,8 +13,8 @@ use Thelia\Core\Event\Coupon\CouponConsumeEvent;
 use Thelia\Core\Event\Customer\CustomerLoginEvent;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Coupon\CouponManager;
-use Thelia\TaxEngine\TaxEngine;
+use Thelia\Domain\Promotion\Coupon\Service\CouponManager;
+use Thelia\Domain\Taxation\TaxEngine\TaxEngine;
 
 /**
  * Listener principal du module AutoDiscount.
@@ -28,10 +30,10 @@ use Thelia\TaxEngine\TaxEngine;
 class AutoDiscountListener implements EventSubscriberInterface
 {
     public function __construct(
-        private RequestStack             $requestStack,
-        private EventDispatcherInterface $dispatcher,
-        private CouponManager            $couponManager,
-        private TaxEngine                $taxEngine
+        private readonly RequestStack             $requestStack,
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly CouponManager            $couponManager,
+        private readonly TaxEngine                $taxEngine
     ) {
     }
 
@@ -113,15 +115,8 @@ class AutoDiscountListener implements EventSubscriberInterface
 
         /** @var \Thelia\Core\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
-        if (null === $session) {
-            return;
-        }
 
         $cart = $session->getSessionCart($this->dispatcher);
-        if (null === $cart) {
-            return;
-        }
-
         // Montant TTC brut (false = sans soustraire de remise existante).
         // La remise Thelia est en TTC, et les clients raisonnent en TTC.
         // On compare les paliers et on calcule le montant de remise en TTC.
@@ -167,26 +162,18 @@ class AutoDiscountListener implements EventSubscriberInterface
 
         /** @var \Thelia\Core\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
-        if (null === $session) {
-            return;
-        }
 
         $session->set(AutoDiscount::SESSION_KEY, 0);
 
         // Le panier sera vide après l'événement CART_CLEAR,
         // la remise se remettra à 0 naturellement.
-        $cart = $session->getSessionCart($this->dispatcher);
-        if (null !== $cart) {
-            $couponDiscount = (float) $this->couponManager->getDiscount();
-            $cart->setDiscount($couponDiscount);
-            $cart->save();
-        }
+        $couponDiscount = (float) $this->couponManager->getDiscount();
 
-        $order = $session->getOrder();
-        if (null !== $order) {
-            $couponDiscount = (float) $this->couponManager->getDiscount();
-            $order->setDiscount($couponDiscount);
-        }
+        $cart = $session->getSessionCart($this->dispatcher);
+        $cart->setDiscount($couponDiscount);
+        $cart->save();
+
+        $session->getOrder()->setDiscount($couponDiscount);
     }
 
     // ─── Abonnements ────────────────────────────────────────────────────────

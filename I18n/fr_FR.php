@@ -1,7 +1,31 @@
 <?php
 
-// Traductions utilisées dans le code PHP (namespace autodiscount)
 return [
     'Le montant seuil doit être positif.' => 'Le montant seuil doit être positif.',
     'Le pourcentage de remise doit être compris entre 0 et 100.' => 'Le pourcentage de remise doit être compris entre 0 et 100.',
+    'Remise automatique par palier' => 'Remise automatique par palier',
+    'Enregistrer' => 'Enregistrer',
+    'Retour aux modules' => 'Retour aux modules',
+    'Définissez autant de paliers que vous souhaitez. Lorsque le montant HT du panier atteint un seuil, la remise correspondante est appliquée automatiquement. C\'est toujours le palier le plus élevé atteint qui est utilisé.' => 'Définissez autant de paliers que vous souhaitez. Lorsque le montant HT du panier atteint un seuil, la remise correspondante est appliquée automatiquement. C\'est toujours le palier le plus élevé atteint qui est utilisé.',
+    'Exemple' => 'Exemple',
+    'Seuil 100 € → 5 %, seuil 300 € → 10 % : un panier à 350 € bénéficie de 10 %.' => 'Seuil 100 € → 5 %, seuil 300 € → 10 % : un panier à 350 € bénéficie de 10 %.',
+    'Montant seuil (≥ €)' => 'Montant seuil (≥ €)',
+    'Remise (%)' => 'Remise (%)',
+    'Actions' => 'Actions',
+    'Supprimer' => 'Supprimer',
+    'Ajouter un palier' => 'Ajouter un palier',
+    'Paliers enregistrés avec succès.' => 'Paliers enregistrés avec succès.',
+    'Une erreur est survenue.' => 'Une erreur est survenue.',
+    'Erreur réseau – veuillez réessayer.' => 'Erreur réseau – veuillez réessayer.',
+    'Remise automatique appliquée' => 'Remise automatique appliquée',
+    'Définissez vos seuils de remise. Le palier le plus élevé atteint est automatiquement appliqué sur le total TTC du panier.' => 'Définissez vos seuils de remise. Le palier le plus élevé atteint est automatiquement appliqué sur le total TTC du panier.',
+    'Supprimer ce palier' => 'Supprimer ce palier',
+    'AutoDiscount – Configuration' => 'AutoDiscount – Configuration',
+    'Remise appliquée' => 'Remise appliquée',
+    'Veuillez corriger les champs en rouge.' => 'Veuillez corriger les champs en rouge.',
+    'Montant seuil TTC' => 'Montant seuil TTC',
+    'AutoDiscount – Remise automatique par palier' => 'AutoDiscount – Remise automatique par palier',
+    'Palier 100 € → 5 %, palier 300 € → 10 %. Un panier à 350 € TTC bénéficie automatiquement de 10 %. La remise est cumulable avec les coupons.' => 'Palier 100 € → 5 %, palier 300 € → 10 %. Un panier à 350 € TTC bénéficie automatiquement de 10 %. La remise est cumulable avec les coupons.',
+    'Aucun palier configuré. Ajoutez votre premier palier ci-dessus.' => 'Aucun palier configuré. Ajoutez votre premier palier ci-dessus.',
+    'Enregistrer les paliers' => 'Enregistrer les paliers',
 ];

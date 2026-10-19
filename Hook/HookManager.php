@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoDiscount\Hook;
 
 use AutoDiscount\AutoDiscount;
@@ -11,37 +13,28 @@ use Thelia\Core\Hook\BaseHook;
  */
 class HookManager extends BaseHook
 {
-    /**
-     * Hook back-office : page de configuration du module dans /admin/modules.
-     * La page est désormais servie par AutoDiscountConfigController (route GET).
-     * Cette méthode est conservée vide pour compatibilité.
-     */
-    public function onModuleConfiguration(HookRenderEvent $event): void
+    public static function getSubscribedHooks(): array
     {
-        // Rendu délégué au contrôleur – ne rien ajouter ici.
+        return [
+            'order-invoice.before-discount' => [
+                ['type' => 'front', 'method' => 'onOrderInvoiceBeforeDiscount'],
+            ],
+        ];
     }
 
     /**
-     * Hook front-office : affiché avant la zone "discount" sur la page
-     * order-invoice (récapitulatif commande / tunnel de paiement).
+     * Affiché avant la zone "discount" de la page order-invoice (récapitulatif commande).
      */
     public function onOrderInvoiceBeforeDiscount(HookRenderEvent $event): void
     {
-        $session = $this->getSession();
-        if (null === $session) {
-            return;
-        }
-
-        $autoDiscountAmount = (float) $session->get(AutoDiscount::SESSION_KEY, 0);
+        $autoDiscountAmount = (float) $this->getSession()->get(AutoDiscount::SESSION_KEY, 0);
 
         if ($autoDiscountAmount <= 0) {
             return;
         }
 
-        $event->add(
-            $this->render('order-invoice-auto-discount.html', [
-                'auto_discount_amount' => $autoDiscountAmount,
-            ])
-        );
+        $event->add($this->render('order-invoice-auto-discount.html.twig', [
+            'auto_discount_amount' => $autoDiscountAmount,
+        ]));
     }
 }

@@ -1,26 +1,23 @@
 {
-    "name": "autodiscount/autodiscount",
-    "type": "thelia-module",
-    "description": "Automatically applies cart discounts by configured amount thresholds",
-    "keywords": [
-        "thelia",
-        "module",
-        "discount",
-        "cart",
-        "promotion",
-        "threshold"
-    ],
-    "authors": [
-        {
-            "name": "Delimard Thibault",
-            "email": "support@delimard.fr",
-            "homepage": "http://www.delimard.fr"
-        }
-    ],
-    "require": {
-        "thelia/installer": "~1.1"
-    },
-    "extra": {
-        "installer-name": "AutoDiscount"
+  "name": "local/auto-discount",
+  "description": "Module Thelia - Remise automatique par palier de montant panier",
+  "type": "thelia-module",
+  "version": "3.0.1",
+  "authors": [
+    {
+      "name": "Laura"
     }
+  ],
+  "require": {
+    "php": ">=8.2",
+    "thelia/installer": "^1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "AutoDiscount\\": ""
+    }
+  },
+  "extra": {
+    "module-dir": "AutoDiscount"
+  }
 }

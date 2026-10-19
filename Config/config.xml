@@ -2,17 +2,5 @@
 <config xmlns="http://thelia.net/schema/dic/config"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
-
-    <hooks>
-        <!-- Back-office: configuration page in module list -->
-        <hook id="autodiscount.back.hook" class="AutoDiscount\Hook\HookManager" scope="request">
-            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
-        </hook>
-
-        <!-- Front-office: display applied discount on the order-invoice page -->
-        <hook id="autodiscount.front.hook" class="AutoDiscount\Hook\HookManager" scope="request">
-            <tag name="hook.event_listener" event="order-invoice.before-discount" type="front" method="onOrderInvoiceBeforeDiscount" />
-        </hook>
-    </hooks>
-
+    <!-- Hooks, listeners and controllers are autoconfigured (see AutoDiscount::configureServices()). -->
 </config>

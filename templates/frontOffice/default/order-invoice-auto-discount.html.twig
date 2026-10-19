@@ -1,0 +1,17 @@
+{# Affiché dans le hook "order-invoice.before-discount" : remise automatique appliquée au panier #}
+{% if auto_discount_amount > 0 %}
+    {% set auto_discount_currency = '' %}
+    {% for currency in loop('autodiscount.currency', 'currency', {default_only: 1}) %}
+        {% set auto_discount_currency = currency.SYMBOL %}
+    {% endfor %}
+
+    <tr class="autodiscount-row">
+        <td colspan="2" class="text-success">
+            <i class="bi bi-tag"></i>
+            <strong>{{ 'Remise automatique appliquée'|trans({}, 'autodiscount') }}</strong>
+        </td>
+        <td colspan="2" class="text-success text-end">
+            &minus;&nbsp;{{ auto_discount_amount|number_format(2, ',', ' ') }}&nbsp;{{ auto_discount_currency }}
+        </td>
+    </tr>
+{% endif %}

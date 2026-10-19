@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoDiscount;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
+use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Module\BaseModule;
 
 /**
@@ -15,29 +18,50 @@ use Thelia\Module\BaseModule;
 class AutoDiscount extends BaseModule
 {
     /** @var string Domaine de traduction */
-    const DOMAIN_NAME = 'autodiscount';
+    public const DOMAIN_NAME = 'autodiscount';
 
     /** @var string Clé de configuration Thelia pour les règles JSON */
-    const CONFIG_RULES = 'autodiscount_rules';
+    public const CONFIG_RULES = 'autodiscount_rules';
 
     /** @var string Clé de session stockant le montant de remise automatique appliqué */
-    const SESSION_KEY = 'autodiscount.applied_amount';
+    public const SESSION_KEY = 'autodiscount.applied_amount';
 
     // ─── Cycle de vie Thelia ─────────────────────────────────────────────────
 
     /**
      * Initialise la config par défaut lors de l'activation du module.
      */
-    public function preActivation(ConnectionInterface $con = null): bool
+    public function preActivation(?ConnectionInterface $con = null): bool
     {
         if (!self::getConfigValue('is_initialized', false)) {
             // Aucune base de données nécessaire : les règles sont stockées
             // dans la table module_config de Thelia via setConfigValue.
             self::setConfigValue(self::CONFIG_RULES, '[]');
-            self::setConfigValue('is_initialized', true);
+            self::setConfigValue('is_initialized', '1');
         }
 
         return true;
+    }
+
+    /**
+     * Déclare le hook front "order-invoice.before-discount" : Thelia 3 ne le fournit plus,
+     * et un hook inconnu en base fait ignorer l'abonnement de Hook\HookManager.
+     * Thelia le crée (ou le met à jour) à chaque activation du module.
+     */
+    public function getHooks(): array
+    {
+        return [
+            [
+                'type' => TemplateDefinition::FRONT_OFFICE,
+                'code' => 'order-invoice.before-discount',
+                'title' => [
+                    'fr_FR' => 'Récapitulatif commande - avant les remises',
+                    'en_US' => 'Order invoice - before discount',
+                ],
+                'block' => false,
+                'active' => true,
+            ],
+        ];
     }
 
     /**
@@ -46,7 +70,7 @@ class AutoDiscount extends BaseModule
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()) . '/I18n/*'])
+            ->exclude([__DIR__.'/I18n/*'])
             ->autowire(true)
             ->autoconfigure(true);
     }
